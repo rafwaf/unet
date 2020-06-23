@@ -129,7 +129,8 @@ def build_model(nx: Optional[int] = None,
                 dropout_rate: int = 0.5,
                 padding:str="valid",
                 activation:Union[str, Callable]="relu",
-                last_bias_initializer=None) -> Model:
+                last_bias_initializer=None,
+                last_activation=None) -> Union[Model, None]:
     """
     Constructs a U-Net model
 
@@ -191,7 +192,12 @@ def build_model(nx: Optional[int] = None,
                           padding=padding)(x)
 
     x = layers.Activation(activation)(x)
-    outputs = layers.Activation("softmax", name="outputs")(x)
+    
+    if last_activation is None:
+        print("Wrong Usage: Build model must include a last_activation parameter that can be either 'softmax' or 'sigmoid'. The model has not been built."
+        return None
+    
+    outputs = layers.Activation(last_activation, name="outputs")(x)
     model = Model(inputs, outputs, name="unet")
 
     return model
