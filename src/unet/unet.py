@@ -194,7 +194,7 @@ def build_model(nx: Optional[int] = None,
     x = layers.Activation(activation)(x)
     
     if last_activation is None:
-        print("Wrong Usage: Build model must include a last_activation parameter that can be either 'softmax' or 'sigmoid'. The model has not been built."
+        print("Wrong Usage: Build model must include a last_activation parameter that can be either 'softmax' or 'sigmoid'. The model has not been built.")
         return None
     
     outputs = layers.Activation(last_activation, name="outputs")(x)
