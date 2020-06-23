@@ -128,7 +128,8 @@ def build_model(nx: Optional[int] = None,
                 pool_size: int = 2,
                 dropout_rate: int = 0.5,
                 padding:str="valid",
-                activation:Union[str, Callable]="relu") -> Model:
+                activation:Union[str, Callable]="relu",
+                last_bias_initializer=None) -> Model:
     """
     Constructs a U-Net model
 
@@ -175,11 +176,19 @@ def build_model(nx: Optional[int] = None,
         x = CropConcatBlock()(x, contracting_layers[layer_idx])
         x = ConvBlock(layer_idx, **conv_params)(x)
 
-    x = layers.Conv2D(filters=num_classes,
-                      kernel_size=(1, 1),
-                      kernel_initializer=_get_kernel_initializer(filters_root, kernel_size),
-                      strides=1,
-                      padding=padding)(x)
+    if last_bias_initializer is not None:
+        x = layers.Conv2D(filters=num_classes,
+                          kernel_size=(1, 1),
+                          kernel_initializer=_get_kernel_initializer(filters_root, kernel_size),
+                          strides=1,
+                          padding=padding,
+                          bias_initializer=last_bias_initializer)(x)
+    else:
+        x = layers.Conv2D(filters=num_classes,
+                          kernel_size=(1, 1),
+                          kernel_initializer=_get_kernel_initializer(filters_root, kernel_size),
+                          strides=1,
+                          padding=padding)(x)
 
     x = layers.Activation(activation)(x)
     outputs = layers.Activation("softmax", name="outputs")(x)
