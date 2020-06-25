@@ -64,6 +64,8 @@ class TensorBoardImageSummary(Callback):
 
         if predictions.shape[-1] == 2:
             mask = predictions[..., :1]
+        elif predictions.shape[-1] == 1:
+            mask = predictions
         else:
             mask = np.argmax(predictions, axis=-1)[..., np.newaxis]
 
