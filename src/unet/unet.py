@@ -190,12 +190,12 @@ def build_model(nx: Optional[int] = None,
                           kernel_initializer=_get_kernel_initializer(filters_root, kernel_size),
                           strides=1,
                           padding=padding)(x)
-
-    x = layers.Activation(activation)(x)
     
     if last_activation is None:
         print("Wrong Usage: Build model must include a last_activation parameter that can be either 'softmax' or 'sigmoid'. The model has not been built.")
         return None
+    if last_activation == "softmax":
+        x = layers.Activation(activation)(x)
     
     outputs = layers.Activation(last_activation, name="outputs")(x)
     model = Model(inputs, outputs, name="unet")
