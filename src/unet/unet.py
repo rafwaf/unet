@@ -45,7 +45,7 @@ class ConvBlock(layers.Layer):
 
         if training:
             x = self.dropout_1(x)
-        if not isinstance(self.activation, tensorflow.python.keras.layers.advanced_activations.PReLU):
+        if not isinstance(self.activation, tf.python.keras.layers.advanced_activations.PReLU):
             x = self.activation_1(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
@@ -54,7 +54,7 @@ class ConvBlock(layers.Layer):
         if training:
             x = self.dropout_2(x)
 
-        if not isinstance(self.activation, tensorflow.python.keras.layers.advanced_activations.PReLU):
+        if not isinstance(self.activation, tf.python.keras.layers.advanced_activations.PReLU):
             x = self.activation_2(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
@@ -93,7 +93,7 @@ class UpconvBlock(layers.Layer):
     def call(self, inputs, **kwargs):
         x = inputs
         x = self.upconv(x)
-        if not isinstance(self.activation, tensorflow.python.keras.layers.advanced_activations.PReLU):
+        if not isinstance(self.activation, tf.python.keras.layers.advanced_activations.PReLU):
             x = self.activation_1(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
