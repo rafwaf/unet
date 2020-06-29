@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import Model, Input
 from tensorflow.keras import layers
 from tensorflow.keras import losses
-from tensorflow.keras.initializers import TruncatedNormal
+from tensorflow.keras.initializers import TruncatedNormal, Constant
 from tensorflow.keras.optimizers import Adam
 
 import unet.metrics
@@ -45,13 +45,19 @@ class ConvBlock(layers.Layer):
 
         if training:
             x = self.dropout_1(x)
-        x = self.activation_1(x)
+        if not isinstance(self.activation, type(tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))):
+            x = self.activation_1(x)
+        else:
+            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
         x = self.conv2d_2(x)
 
         if training:
             x = self.dropout_2(x)
 
-        x = self.activation_2(x)
+        if not isinstance(self.activation, type(tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))):
+            x = self.activation_2(x)
+        else:
+            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
         return x
 
     def get_config(self):
@@ -87,7 +93,10 @@ class UpconvBlock(layers.Layer):
     def call(self, inputs, **kwargs):
         x = inputs
         x = self.upconv(x)
-        x = self.activation_1(x)
+        if not isinstance(self.activation, type(tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))):
+            x = self.activation_1(x)
+        else:
+            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
         return x
 
     def get_config(self):
