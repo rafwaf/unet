@@ -13,7 +13,7 @@ import unet.metrics
 
 class ConvBlock(layers.Layer):
 
-    def __init__(self, layer_idx, filters_root, kernel_size, dropout_rate, padding, activation, **kwargs):
+    def __init__(self, layer_idx, filters_root, kernel_size, dropout_rate, padding, activation, prelu=True, **kwargs):
         super(ConvBlock, self).__init__(**kwargs)
         self.layer_idx=layer_idx
         self.filters_root=filters_root
@@ -21,7 +21,8 @@ class ConvBlock(layers.Layer):
         self.dropout_rate=dropout_rate
         self.padding=padding
         self.activation=activation
-
+        self.prelu = prelu
+        
         filters = _get_filter_count(layer_idx, filters_root)
         self.conv2d_1 = layers.Conv2D(filters=filters,
                                       kernel_size=(kernel_size, kernel_size),
@@ -45,7 +46,7 @@ class ConvBlock(layers.Layer):
 
         if training:
             x = self.dropout_1(x)
-        if self.activation == "relu":
+        if self.prelu != True:
             x = self.activation_1(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
@@ -54,7 +55,7 @@ class ConvBlock(layers.Layer):
         if training:
             x = self.dropout_2(x)
 
-        if self.activation == "relu":
+        if self.prelu != True::
             x = self.activation_2(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
@@ -73,7 +74,7 @@ class ConvBlock(layers.Layer):
 
 class UpconvBlock(layers.Layer):
 
-    def __init__(self, layer_idx, filters_root, kernel_size, pool_size, padding, activation, **kwargs):
+    def __init__(self, layer_idx, filters_root, kernel_size, pool_size, padding, activation, prelu=True, **kwargs):
         super(UpconvBlock, self).__init__(**kwargs)
         self.layer_idx=layer_idx
         self.filters_root=filters_root
@@ -81,6 +82,7 @@ class UpconvBlock(layers.Layer):
         self.pool_size=pool_size
         self.padding=padding
         self.activation=activation
+        self.prelu = prelu
 
         filters = _get_filter_count(layer_idx + 1, filters_root)
         self.upconv = layers.Conv2DTranspose(filters // 2,
@@ -93,7 +95,7 @@ class UpconvBlock(layers.Layer):
     def call(self, inputs, **kwargs):
         x = inputs
         x = self.upconv(x)
-        if self.activation == "relu":
+        if self.prelu != True:
             x = self.activation_1(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
@@ -139,7 +141,8 @@ def build_model(nx: Optional[int] = None,
                 padding:str="valid",
                 activation:Union[str, Callable]="relu",
                 last_bias_initializer=None,
-                last_activation=None) -> Union[Model, None]:
+                last_activation=None,
+                prelu=True) -> Union[Model, None]:
     """
     Constructs a U-Net model
 
@@ -167,7 +170,8 @@ def build_model(nx: Optional[int] = None,
                        kernel_size=kernel_size,
                        dropout_rate=dropout_rate,
                        padding=padding,
-                       activation=activation)
+                       activation=activation,
+                       prelu=prelu)
 
     for layer_idx in range(0, layer_depth - 1):
         x = ConvBlock(layer_idx, **conv_params)(x)
@@ -182,7 +186,8 @@ def build_model(nx: Optional[int] = None,
                         kernel_size,
                         pool_size,
                         padding,
-                        activation)(x)
+                        activation,
+                        prelu=prelu)(x)
         x = CropConcatBlock()(x, contracting_layers[layer_idx])
         x = ConvBlock(layer_idx, **conv_params)(x)
 
