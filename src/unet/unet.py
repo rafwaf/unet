@@ -55,7 +55,7 @@ class ConvBlock(layers.Layer):
         if training:
             x = self.dropout_2(x)
 
-        if self.prelu != True::
+        if self.prelu != True:
             x = self.activation_2(x)
         else:
             x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
