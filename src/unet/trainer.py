@@ -35,6 +35,7 @@ class Trainer:
                  tensorboard_images_callback: Optional[Union[TensorBoardImageSummary, bool]] = True,
                  callbacks: Union[List[Callback], None]=None,
                  learning_rate_scheduler: Optional[Union[SchedulerType, Callback]]=None,
+                 monitor="val_loss",
                  **scheduler_opts,
                  ):
         self.checkpoint_callback = checkpoint_callback
@@ -43,6 +44,7 @@ class Trainer:
         self.callbacks = callbacks
         self.learning_rate_scheduler = learning_rate_scheduler
         self.scheduler_opts=scheduler_opts
+        self.monitor=monitor
 
         if log_dir_path is None:
             log_dir_path = build_log_dir_path(name)
@@ -119,7 +121,8 @@ class Trainer:
             callbacks.append(self.checkpoint_callback)
         elif self.checkpoint_callback:
             callbacks.append(ModelCheckpoint(self.log_dir_path,
-                                             save_best_only=True))
+                                             save_best_only=True,
+                                             monitor=self.monitor))
 
         if isinstance(self.tensorboard_callback, Callback):
             callbacks.append(self.tensorboard_callback)
