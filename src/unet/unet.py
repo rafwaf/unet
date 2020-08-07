@@ -31,7 +31,8 @@ class ConvBlock(layers.Layer):
                                       padding=padding)
         self.dropout_1 = layers.Dropout(rate=dropout_rate)
         self.activation_1 = layers.Activation(activation)
-
+        self.prelu_1 = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))
+        
         self.conv2d_2 = layers.Conv2D(filters=filters,
                                       kernel_size=(kernel_size, kernel_size),
                                       kernel_initializer=_get_kernel_initializer(filters, kernel_size),
@@ -39,6 +40,7 @@ class ConvBlock(layers.Layer):
                                       padding=padding)
         self.dropout_2 = layers.Dropout(rate=dropout_rate)
         self.activation_2 = layers.Activation(activation)
+        self.prelu_2 = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))
 
     def call(self, inputs, training=None, **kwargs):
         x = inputs
@@ -49,7 +51,7 @@ class ConvBlock(layers.Layer):
         if self.prelu != True:
             x = self.activation_1(x)
         else:
-            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
+            x = self.prelu_1(x)
         x = self.conv2d_2(x)
 
         if training:
@@ -58,7 +60,7 @@ class ConvBlock(layers.Layer):
         if self.prelu != True:
             x = self.activation_2(x)
         else:
-            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
+            x = self.prelu_2(x)
         return x
 
     def get_config(self):
@@ -91,6 +93,7 @@ class UpconvBlock(layers.Layer):
                                              strides=pool_size, padding=padding)
 
         self.activation_1 = layers.Activation(activation)
+        self.prelu_1 = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))
 
     def call(self, inputs, **kwargs):
         x = inputs
@@ -98,7 +101,7 @@ class UpconvBlock(layers.Layer):
         if self.prelu != True:
             x = self.activation_1(x)
         else:
-            x = tf.keras.layers.PReLU(shared_axes=[1, 2], alpha_initializer=Constant(value=0.25))(x)
+            x = self.prelu_1(x)
         return x
 
     def get_config(self):
